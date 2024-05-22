@@ -2,11 +2,10 @@ package com.example.effectivemobile2.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+//import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Phone {
@@ -16,10 +15,11 @@ public class Phone {
     @Column(unique = true)
     private String phone;
     @ManyToOne
-    @JoinColumn(name = "bank_user_id", nullable = true)
+    @JoinColumn(name = "user_id")
     private BankUser bankUser;
 
-    public Phone(String phone) {
+    public Phone(String phone, BankUser bankUser) {
         this.phone = phone;
+        this.bankUser = bankUser;
     }
 }
