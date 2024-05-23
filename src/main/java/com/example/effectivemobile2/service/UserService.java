@@ -3,17 +3,18 @@ package com.example.effectivemobile2.service;
 import com.example.effectivemobile2.dto.BankUserCreateDTO;
 import com.example.effectivemobile2.dto.BankUserDeleteDTO;
 import com.example.effectivemobile2.dto.BankUserUpdateDTO;
-import com.example.effectivemobile2.entity.*;
-import jakarta.persistence.EntityManager;
-//import javax.persistence.*;
-import jakarta.persistence.Persistence;
+import com.example.effectivemobile2.entity.BankUser;
+import com.example.effectivemobile2.entity.Email;
+import com.example.effectivemobile2.entity.Phone;
+import com.example.effectivemobile2.repo.EmailRepository;
+import com.example.effectivemobile2.repo.PhoneRepository;
+import com.example.effectivemobile2.repo.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
-//import static com.example.effectivemobile2.entity.UserRepository.manager;
 
 @Service
 @AllArgsConstructor
@@ -28,11 +29,11 @@ public class UserService {
     // для создания экземпляра user, который и попадет в БД
     public BankUser create(BankUserCreateDTO dto) {
 
-        EntityManager manager = Persistence
-                .createEntityManagerFactory("MyU")
-                .createEntityManager();
-
-        manager.getTransaction().begin();
+//        EntityManager manager = Persistence
+//                .createEntityManagerFactory("MyU")
+//                .createEntityManager();
+//
+//        manager.getTransaction().begin();
 
         BankUser bank_user = BankUser.builder()
                 .login(dto.getLogin())
@@ -55,16 +56,9 @@ public class UserService {
         emailRepository.save(email);
 
         System.out.println("\n"+bank_user+"\n");
-        //конструкция для предотвращения рекурсивного вызова объектов
+//        manager.getTransaction().commit();
 
-
-//        manager.persist(bank_user);
-//        manager.persist(phone);
-//        manager.persist(email);
-
-        manager.getTransaction().commit();
-
-        return bank_user;
+        return userRepository.getReferenceById(bank_user.getUser_id());
     }
 
 

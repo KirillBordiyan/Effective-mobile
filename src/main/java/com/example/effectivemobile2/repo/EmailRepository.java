@@ -1,5 +1,6 @@
-package com.example.effectivemobile2.entity;
+package com.example.effectivemobile2.repo;
 
+import com.example.effectivemobile2.entity.Email;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

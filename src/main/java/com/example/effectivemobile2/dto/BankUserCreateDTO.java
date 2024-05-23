@@ -1,7 +1,5 @@
 package com.example.effectivemobile2.dto;
 
-import com.example.effectivemobile2.entity.Email;
-import com.example.effectivemobile2.entity.Phone;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +9,6 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-//@NotBlank
 public class BankUserCreateDTO {
 
     private String login;
