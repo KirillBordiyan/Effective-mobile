@@ -5,17 +5,20 @@ import com.example.effectivemobile2.dto.BankUserDeleteDTO;
 import com.example.effectivemobile2.dto.BankUserUpdateDTO;
 import com.example.effectivemobile2.entity.*;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Persistence;
 //import javax.persistence.*;
+import jakarta.persistence.Persistence;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+//import static com.example.effectivemobile2.entity.UserRepository.manager;
+
 @Service
 @AllArgsConstructor
 public class UserService {
+
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final EmailRepository emailRepository;
@@ -25,35 +28,43 @@ public class UserService {
     // для создания экземпляра user, который и попадет в БД
     public BankUser create(BankUserCreateDTO dto) {
 
-        BankUser bankUser = BankUser.builder()
+        EntityManager manager = Persistence
+                .createEntityManagerFactory("MyU")
+                .createEntityManager();
+
+        manager.getTransaction().begin();
+
+        BankUser bank_user = BankUser.builder()
                 .login(dto.getLogin())
                 .password(dto.getPassword())
                 .currentBalance(dto.getInitialAmount())
                 .birthDate(dto.getBirthDate())
                 .fullName(dto.getFullName())
                 .build();
-        Phone phone = new Phone(dto.getPhoneNumber(), bankUser);
-        Email email = new Email(dto.getEmail(), bankUser);
 
-        bankUser.setPhoneNumberList(new HashSet<>(Set.of(phone)));
-        bankUser.setEmailList(new HashSet<>(Set.of(email)));
 
-        userRepository.save(bankUser);
+        Phone phone = new Phone(dto.getPhoneNumber(), bank_user);
+        Email email = new Email(dto.getEmail(), bank_user);
+
+        bank_user.setPhoneNumberList(new HashSet<>(Set.of(phone)));
+        bank_user.setEmailList(new HashSet<>(Set.of(email)));
+
+
+        userRepository.save(bank_user);
         phoneRepository.save(phone);
         emailRepository.save(email);
 
-        EntityManager manager = Persistence
-                .createEntityManagerFactory("YourPersistenceUnit")
-                .createEntityManager();
-
+        System.out.println("\n"+bank_user+"\n");
         //конструкция для предотвращения рекурсивного вызова объектов
-        manager.getTransaction().begin();
-        manager.persist(bankUser);
-        manager.persist(phone);
-        manager.persist(email);
+
+
+//        manager.persist(bank_user);
+//        manager.persist(phone);
+//        manager.persist(email);
+
         manager.getTransaction().commit();
 
-        return bankUser;
+        return bank_user;
     }
 
 
@@ -74,9 +85,14 @@ public class UserService {
 //        v.setPhoneNumberList(Set.of(p));
 
 
-    public List<BankUser> readAll() {
-        return userRepository.findAll();
-    }
+//    public List<BankUser> readAll() {
+////        return userRepository.findAll()
+////                .stream()
+////                .toList();
+////        return manager.createQuery("from "+ BankUser.class.getName()).getResultList();
+//        EntityManager manager = userRepository.getUserEntityManager();
+//        return manager.createQuery("from BankUser").getResultList();
+//    }
 
     //dto на апдейт email tel
     //достать текущий, замена из апдейта
@@ -84,8 +100,6 @@ public class UserService {
     //везде дто(id, email, tel)
     public BankUser update(BankUserUpdateDTO dtoUpdate) {
 //        BankUser bankUser = userRepository.getReferenceById(dtoUpdate.getId());
-
-
 //        return userRepository.save(dtoUpdate);
         return null;
     }

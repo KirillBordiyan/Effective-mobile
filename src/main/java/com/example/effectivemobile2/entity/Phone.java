@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 //import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-@Entity
+@Entity(name = "phone")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Phone {
@@ -16,10 +17,17 @@ public class Phone {
     private String phone;
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private BankUser bankUser;
+    private BankUser bank_user;
 
-    public Phone(String phone, BankUser bankUser) {
+    public Phone(String phone, BankUser bank_user) {
         this.phone = phone;
-        this.bankUser = bankUser;
+        this.bank_user = bank_user;
+    }
+
+    @Override
+    public String toString() {
+        return "Phone{" +
+                "id=" + id +
+                ", phone='" + phone + '\'';
     }
 }

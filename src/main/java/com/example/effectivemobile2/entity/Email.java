@@ -2,12 +2,11 @@ package com.example.effectivemobile2.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-//import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-//import javax.persistence.*;
 
-@Entity
+@Entity(name = "email")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Email {
@@ -18,10 +17,17 @@ public class Email {
     private String email;
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private BankUser bankUser;
+    private BankUser bank_user;
 
-    public Email(String email, BankUser bankUser) {
+    public Email(String email, BankUser bank_user) {
         this.email = email;
-        this.bankUser = bankUser;
+        this.bank_user = bank_user;
+    }
+
+    @Override
+    public String toString() {
+        return "Email{" +
+                "id=" + id +
+                ", email='" + email + '\'';
     }
 }

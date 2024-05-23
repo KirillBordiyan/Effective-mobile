@@ -6,6 +6,7 @@ import com.example.effectivemobile2.dto.BankUserUpdateDTO;
 import com.example.effectivemobile2.entity.*;
 import com.example.effectivemobile2.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class UserController {
 
+    @Autowired
     private final UserService userService;
 
     //далее методы обращения к сервису
@@ -29,10 +31,10 @@ public class UserController {
     }
 
     //получение списка пользователей
-    @GetMapping("/get_all")
-    public ResponseEntity<List<BankUser>>  readAll() {
-        return new ResponseEntity<>(userService.readAll(), HttpStatus.OK);
-    }
+//    @GetMapping("/get_all")
+//    public ResponseEntity<List<BankUser>>  readAll() {
+//        return new ResponseEntity<>(userService.readAll(), HttpStatus.OK);
+//    }
 
 //    @GetMapping("/get/id") для получения другого типа инфы
 
