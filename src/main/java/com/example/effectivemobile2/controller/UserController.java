@@ -20,8 +20,6 @@ public class UserController {
     @Autowired
     private final UserService userService;
 
-    //далее методы обращения к сервису
-
     //создание нового пользователя
     @PostMapping("/create_user_db")
     public ResponseEntity<BankUserEntity> create(@RequestBody BankUserCreateDTO dto) {
@@ -31,10 +29,10 @@ public class UserController {
     }
 
     //получение списка пользователей
-//    @GetMapping("/get_all")
-//    public ResponseEntity<List<BankUser>>  readAll() {
-//        return new ResponseEntity<>(userService.readAll(), HttpStatus.OK);
-//    }
+    @GetMapping("/get_all")
+    public ResponseEntity<List<BankUser>> readAll() {
+        return new ResponseEntity<>(userService.readAll(), HttpStatus.OK);
+    }
 
 //    @GetMapping("/get/id") для получения другого типа инфы
 

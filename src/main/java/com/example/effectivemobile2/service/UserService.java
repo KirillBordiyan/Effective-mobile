@@ -4,6 +4,7 @@ import com.example.effectivemobile2.dto.BankUserCreateDTO;
 import com.example.effectivemobile2.dto.BankUserDeleteDTO;
 import com.example.effectivemobile2.dto.BankUserUpdateDTO;
 import com.example.effectivemobile2.entity.BankUser;
+import com.example.effectivemobile2.entity.BankUserEntity;
 import com.example.effectivemobile2.entity.Email;
 import com.example.effectivemobile2.entity.Phone;
 import com.example.effectivemobile2.repo.EmailRepository;
@@ -12,8 +13,7 @@ import com.example.effectivemobile2.repo.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
 @Service
@@ -29,12 +29,6 @@ public class UserService {
     // для создания экземпляра user, который и попадет в БД
     public BankUser create(BankUserCreateDTO dto) {
 
-//        EntityManager manager = Persistence
-//                .createEntityManagerFactory("MyU")
-//                .createEntityManager();
-//
-//        manager.getTransaction().begin();
-
         BankUser bank_user = BankUser.builder()
                 .login(dto.getLogin())
                 .password(dto.getPassword())
@@ -43,50 +37,29 @@ public class UserService {
                 .fullName(dto.getFullName())
                 .build();
 
-
         Phone phone = new Phone(dto.getPhoneNumber(), bank_user);
         Email email = new Email(dto.getEmail(), bank_user);
 
-        bank_user.setPhoneNumberList(new HashSet<>(Set.of(phone)));
-        bank_user.setEmailList(new HashSet<>(Set.of(email)));
-
+        if(bank_user.getPhoneList() == null){
+            bank_user.setPhoneList(new HashSet<>());
+            bank_user.getPhoneList().add(phone);
+        }
+        if(bank_user.getEmailList() == null){
+            bank_user.setEmailList(new HashSet<>());
+            bank_user.getEmailList().add(email);
+        }
 
         userRepository.save(bank_user);
         phoneRepository.save(phone);
         emailRepository.save(email);
 
-        System.out.println("\n"+bank_user+"\n");
-//        manager.getTransaction().commit();
-
-        return userRepository.getReferenceById(bank_user.getUser_id());
+        return bank_user;
     }
 
 
-//        BankUser newU = userRepository.getReferenceById(id);
-//        newU.setEmailList(Set.of(emailRepository.getReferenceById(eId)));
-//        newU.setPhoneNumberList(Set.of(phoneRepository.getReferenceById(pId)));
-//        Long newUId = userRepository.save(newU).getId();
-//        Phone newP = phoneRepository.getReferenceById(pId);
-//        newP.setBankUser(newU);
-//        phoneRepository.save(newP);
-//        Email newE = emailRepository.getReferenceById(eId);
-//        newE.setBankUser(newU);
-//        emailRepository.save(newE);
-//
-//        return userRepository.getReferenceById(newUId);
-
-//        v.setEmailList(Set.of(e));
-//        v.setPhoneNumberList(Set.of(p));
-
-
-//    public List<BankUser> readAll() {
-////        return userRepository.findAll()
-////                .stream()
-////                .toList();
-////        return manager.createQuery("from "+ BankUser.class.getName()).getResultList();
-//        EntityManager manager = userRepository.getUserEntityManager();
-//        return manager.createQuery("from BankUser").getResultList();
-//    }
+    public List<BankUser> readAll() {
+        return userRepository.findAll().stream().toList();
+    }
 
     //dto на апдейт email tel
     //достать текущий, замена из апдейта
