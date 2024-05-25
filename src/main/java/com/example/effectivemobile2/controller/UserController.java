@@ -4,6 +4,7 @@ import com.example.effectivemobile2.dto.BankUserCreateDTO;
 import com.example.effectivemobile2.dto.BankUserDeleteDTO;
 import com.example.effectivemobile2.dto.BankUserUpdateDTO;
 import com.example.effectivemobile2.entity.*;
+import com.example.effectivemobile2.repo.FilterParams;
 import com.example.effectivemobile2.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,10 @@ public class UserController {
         return new ResponseEntity<>(userService.readAll(), HttpStatus.OK);
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<BankUser>> filterByParam(@RequestParam FilterParams filterBy, @RequestParam String param) {
+        return new ResponseEntity<>(userService.filter(filterBy, param), HttpStatus.OK);
+    }
 //    @GetMapping("/get/id") для получения другого типа инфы
 
 

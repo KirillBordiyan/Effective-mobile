@@ -12,10 +12,10 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<BankUser, Long> {
-    List<BankUser> findByBirthDateGreaterThan (LocalDate birtDate); //фильтр, где дата > чем в запросе
-    BankUser findByPhones (Phone phone); // фильтр по 100% сходству
-    List<BankUser> findByFullNameLike (String name);//фильтр по совпадению like ‘{text-from-request-param}%’
-    BankUser findByEmails (Email email); // фильтр по 100% сходству
+    List<BankUser> findByBirthDateGreaterThanEqual (LocalDate birtDate); //фильтр, где дата > чем в запросе
+    List<BankUser> findByPhones (Phone phone); // фильтр по 100% сходству
+    List<BankUser> findByFullNameContaining (String name);//фильтр по совпадению like ‘{text-from-request-param}%’
+    List<BankUser> findByEmails (Email email); // фильтр по 100% сходству
 }
 
 
