@@ -22,5 +22,4 @@ public class BankUserCreateDTO {
     private String birthDate;
 //    @Size(min = 2, max = 40, message = "Full name cannot be shorter than 2 and longer 40 symbols")
     private String fullName;
-
 }
