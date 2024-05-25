@@ -40,8 +40,8 @@ public class UserController {
     //метод обновления данных в репозитории
     //через сохранение, не dto
     @PutMapping("/update_user")
-    public ResponseEntity<BankUser> update(@RequestBody BankUserUpdateDTO bankUser) {
-        return new ResponseEntity<>(userService.update(bankUser), HttpStatus.OK);
+    public ResponseEntity<BankUserEntity> update(@RequestBody BankUserUpdateDTO dto) {
+        return new ResponseEntity<>(userService.update(dto), HttpStatus.OK);
     }
 
     //удаление пользователя из репозитория по id

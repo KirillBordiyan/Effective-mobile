@@ -11,6 +11,7 @@ import com.example.effectivemobile2.repo.EmailRepository;
 import com.example.effectivemobile2.repo.PhoneRepository;
 import com.example.effectivemobile2.repo.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -20,13 +21,11 @@ import java.util.*;
 @AllArgsConstructor
 public class UserService {
 
+    @Autowired
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final EmailRepository emailRepository;
 
-
-    //dto нужен только как набор параметров в коде
-    // для создания экземпляра user, который и попадет в БД
     public BankUser create(BankUserCreateDTO dto) {
 
         BankUser bank_user = BankUser.builder()
@@ -40,13 +39,13 @@ public class UserService {
         Phone phone = new Phone(dto.getPhoneNumber(), bank_user);
         Email email = new Email(dto.getEmail(), bank_user);
 
-        if(bank_user.getPhoneList() == null){
-            bank_user.setPhoneList(new HashSet<>());
-            bank_user.getPhoneList().add(phone);
+        if(bank_user.getPhones() == null){
+            bank_user.setPhones(new HashSet<>());
+            bank_user.getPhones().add(phone);
         }
-        if(bank_user.getEmailList() == null){
-            bank_user.setEmailList(new HashSet<>());
-            bank_user.getEmailList().add(email);
+        if(bank_user.getEmails() == null){
+            bank_user.setEmails(new HashSet<>());
+            bank_user.getEmails().add(email);
         }
 
         userRepository.save(bank_user);
@@ -56,28 +55,32 @@ public class UserService {
         return bank_user;
     }
 
-
     public List<BankUser> readAll() {
         return userRepository.findAll().stream().toList();
     }
 
-    //dto на апдейт email tel
-    //достать текущий, замена из апдейта
-    //вернуть в бд
-    //везде дто(id, email, tel)
     public BankUser update(BankUserUpdateDTO dtoUpdate) {
-//        BankUser bankUser = userRepository.getReferenceById(dtoUpdate.getId());
-//        return userRepository.save(dtoUpdate);
-        return null;
+        //IndexBound - елси id нет/неправильный
+        // DataIntegrityViolationException - если такой параметр уже существует
+        //InvalidDataAccessApiUsageException - если в id передали null
+
+        BankUser bankUser = userRepository.findById(dtoUpdate.getId()).stream().toList().get(0);
+        System.out.println(bankUser);
+
+        if(dtoUpdate.getPhoneUpdate() != null ){
+            bankUser.getPhones().add(new Phone(dtoUpdate.getPhoneUpdate(), bankUser));
+        }
+        if(dtoUpdate.getEmailUpdate() != null){
+            bankUser.getEmails().add(new Email(dtoUpdate.getEmailUpdate(), bankUser));
+        }
+
+        userRepository.save(bankUser);
+        return bankUser;
     }
 
     public void delete(BankUserDeleteDTO dtoDelete) {
         userRepository.deleteById(dtoDelete.getId());
     }
 
-    //сама логика поиска и всех методов
 
-    //дто на перевод (id1, id2, sum)
-    //lock вручную
-    //это переменна или массив, где челы, кому нельзя делать операции
 }

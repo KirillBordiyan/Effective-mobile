@@ -30,7 +30,7 @@ public class BankUser extends BankUserEntity {
     @Column(name = "login", unique = true)
     private String login;
 
-    @Column(name = "password", unique = true, nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @PositiveOrZero(message = "Balance should be greater or equals 0")
@@ -38,10 +38,10 @@ public class BankUser extends BankUserEntity {
     private float currentBalance;
 
     @OneToMany(mappedBy = "bank_user",cascade = CascadeType.ALL)
-    private Set<Phone> phoneList;
+    private Set<Phone> phones;
 
     @OneToMany(mappedBy = "bank_user", cascade = CascadeType.ALL)
-    private Set<Email> emailList;
+    private Set<Email> emails;
 
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;

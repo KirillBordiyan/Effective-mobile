@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class BankUserUpdateDTO {
 
     private Long id;
-    private String phoneNumber;
-    private String email;
+    private String phoneUpdate;
+    private String emailUpdate;
 }
