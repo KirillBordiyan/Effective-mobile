@@ -3,7 +3,11 @@ package com.example.effectivemobile2.controller;
 import com.example.effectivemobile2.dto.BankUserCreateDTO;
 import com.example.effectivemobile2.dto.BankUserDeleteDTO;
 import com.example.effectivemobile2.dto.BankUserUpdateDTO;
-import com.example.effectivemobile2.entity.*;
+import com.example.effectivemobile2.entity.bank_user.BankUser;
+import com.example.effectivemobile2.entity.bank_user.BankUserEntity;
+import com.example.effectivemobile2.entity.bank_user.BankUserError;
+import com.example.effectivemobile2.entity.bank_user_list_error.BankUserList;
+import com.example.effectivemobile2.entity.user_params.UserParam;
 import com.example.effectivemobile2.repo.FilterParams;
 import com.example.effectivemobile2.service.UserService;
 import lombok.AllArgsConstructor;
@@ -27,7 +31,7 @@ public class UserController {
 
     //создание нового пользователя
     //апи служебный
-    @PostMapping("/create_user_db")
+    @PostMapping("/create_user")
     public ResponseEntity<BankUserEntity> create(@RequestBody BankUserCreateDTO dto,
                                                  @RequestHeader(value = "Authorization", required = false) String token) {
         if (token == null)
@@ -45,16 +49,19 @@ public class UserController {
     //служебный
     @GetMapping("/get_all")
     public ResponseEntity<BankUserList> readAll(@RequestParam(defaultValue = "0") int page) {
-//        try{
-        //пагинация
-        //возвращаем здесь И в остальном целые страницы юзеров
-        Page<BankUser> users = userService.readAll(page);
-        Integer nextPage = (users.getTotalPages() > page + 1) ? page + 1 : null;
-        return new ResponseEntity<>(new BankUserList(users.toList(), nextPage), HttpStatus.OK);
-
-//        }catch (){
-//
-//        }
+        try {
+            //TODO здесь вопрос по этому исключению, тк не отлавливается, ошибка  MethodArgumentTypeMismatchException
+            //TODO пробовал MethodArgumentConversionNotSupportedException, Exception в целом и мб что-то еще
+            //пагинация
+            //возвращаем здесь И в остальном целые страницы юзеров
+            Page<BankUser> users = userService.readAll(page);
+            Integer nextPageIs = (users.getTotalPages() > page + 1) ? page + 1 : null;
+            return new ResponseEntity<>(new BankUserList(users.toList(), nextPageIs), HttpStatus.OK);
+        } catch (NumberFormatException e) {
+            return new ResponseEntity<>(new BankUserList(
+                    List.of(new BankUserError("INCORRECT PAGE FORMAT: " + e.getMessage()))),
+                    HttpStatus.BAD_REQUEST);
+        }
     }
 
     //служебный
@@ -72,7 +79,7 @@ public class UserController {
                     HttpStatus.BAD_REQUEST);
         }
     }
-//    @GetMapping("/get/id") для получения другого типа инфы
+
 
 
     //вопросик, может быть и тот и тот, надо разделить
@@ -80,9 +87,9 @@ public class UserController {
     @PutMapping("/update_user")
     public ResponseEntity<BankUserEntity> update(@RequestBody BankUserUpdateDTO dto) {
         try {
-            BankUserEntity bue = userService.update(dto);
-//            log.error("TAG", "update: " + bue); //лог, что создан (после создания)
-            return new ResponseEntity<>(bue, HttpStatus.OK);
+            BankUserEntity bankUser = userService.update(dto);
+//            log.error("TAG", "update: " + bankUser); //лог, что создан (после создания)
+            return new ResponseEntity<>(bankUser, HttpStatus.OK);
         } catch (IndexOutOfBoundsException e) {
 //            log.info(e.getMessage());
             return new ResponseEntity<>(new BankUserError("INCORRECT ID: " + e.getMessage()),
@@ -100,14 +107,22 @@ public class UserController {
 
     //пользовательский для удаления телефона и почты
 
+    @DeleteMapping("/delete_param")
+    public ResponseEntity<UserParam> deleteByParam(@RequestBody BankUserDeleteDTO deleteDTO){
+//        try{
+            return new ResponseEntity<>(userService.deleteByParam(deleteDTO), HttpStatus.OK);
+//        }
+//        catch (InvalidDataAccessApiUsageException e){
+//            return new ResponseEntity<>()
+//        }
+    }
 
     //удаление пользователя из репозитория по id
     //служебный
-    //доделать исключение
-    @DeleteMapping("/delete_user_db")
-    public HttpStatus delete(@RequestBody BankUserDeleteDTO dtoDelete) {
+    @DeleteMapping("/delete_user")
+    public HttpStatus deleteUser(@RequestBody BankUserDeleteDTO deleteDTO) {
         try {
-            userService.delete(dtoDelete);
+            userService.deleteUser(deleteDTO);
             return HttpStatus.OK;
         } catch (InvalidDataAccessApiUsageException e) {
 //            log.info(e.getMessage());

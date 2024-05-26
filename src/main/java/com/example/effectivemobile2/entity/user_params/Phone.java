@@ -1,5 +1,6 @@
-package com.example.effectivemobile2.entity;
+package com.example.effectivemobile2.entity.user_params;
 
+import com.example.effectivemobile2.entity.bank_user.BankUser;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(value = { "bank_user" })
-public class Phone {
+public class Phone extends UserParam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

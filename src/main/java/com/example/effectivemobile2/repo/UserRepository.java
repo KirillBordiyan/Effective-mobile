@@ -1,16 +1,14 @@
 package com.example.effectivemobile2.repo;
 
-import com.example.effectivemobile2.entity.BankUser;
-import com.example.effectivemobile2.entity.Email;
-import com.example.effectivemobile2.entity.Phone;
-import com.fasterxml.jackson.databind.introspect.DefaultAccessorNamingStrategy;
+import com.example.effectivemobile2.entity.bank_user.BankUser;
+import com.example.effectivemobile2.entity.user_params.Email;
+import com.example.effectivemobile2.entity.user_params.Phone;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<BankUser, Long> {

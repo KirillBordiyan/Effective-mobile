@@ -1,5 +1,7 @@
-package com.example.effectivemobile2.entity;
+package com.example.effectivemobile2.entity.bank_user;
 
+import com.example.effectivemobile2.entity.user_params.Email;
+import com.example.effectivemobile2.entity.user_params.Phone;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;

@@ -3,15 +3,15 @@ package com.example.effectivemobile2.service;
 import com.example.effectivemobile2.dto.BankUserCreateDTO;
 import com.example.effectivemobile2.dto.BankUserDeleteDTO;
 import com.example.effectivemobile2.dto.BankUserUpdateDTO;
-import com.example.effectivemobile2.entity.BankUser;
-import com.example.effectivemobile2.entity.Email;
-import com.example.effectivemobile2.entity.Phone;
+import com.example.effectivemobile2.entity.bank_user.BankUser;
+import com.example.effectivemobile2.entity.user_params.Email;
+import com.example.effectivemobile2.entity.user_params.Phone;
+import com.example.effectivemobile2.entity.user_params.UserParam;
 import com.example.effectivemobile2.repo.EmailRepository;
 import com.example.effectivemobile2.repo.FilterParams;
 import com.example.effectivemobile2.repo.PhoneRepository;
 import com.example.effectivemobile2.repo.UserRepository;
 import lombok.AllArgsConstructor;
-import org.apache.catalina.valves.rewrite.InternalRewriteMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
-import java.util.List;
 
 
 @Service
@@ -65,13 +64,14 @@ public class UserService {
         return bank_user;
     }
 
-    public Page<BankUser> readAll(int page) {
+    public Page<BankUser> readAll(int page) throws NumberFormatException {
         Pageable pageable = PageRequest.of(page, 10);
         return userRepository.findAll(pageable);
     }
 
 
-    public BankUser update(BankUserUpdateDTO dtoUpdate) throws IndexOutOfBoundsException,
+    public BankUser update(BankUserUpdateDTO dtoUpdate) throws
+            IndexOutOfBoundsException,
             DataIntegrityViolationException,
             InvalidDataAccessApiUsageException {
 
@@ -99,8 +99,27 @@ public class UserService {
 //    }
 
 
-    public void delete(BankUserDeleteDTO dtoDelete) throws InvalidDataAccessApiUsageException {
-        userRepository.deleteById(dtoDelete.getId());
+    public void deleteUser(BankUserDeleteDTO deleteDTO) throws InvalidDataAccessApiUsageException {
+        userRepository.deleteById(deleteDTO.getId());
+    }
+
+
+    public UserParam deleteByParam(BankUserDeleteDTO deleteDTO) throws InvalidDataAccessApiUsageException{
+        if(deleteDTO.getPhoneDelete() != null){
+            return deleteByPhone(deleteDTO.getPhoneDelete());
+        }
+        if(deleteDTO.getEmailDelete() != null){
+            return deleteByEmail(deleteDTO.getEmailDelete());
+        }
+        return null;
+    }
+
+    public Phone deleteByPhone(String phone) throws InvalidDataAccessApiUsageException {
+        return phoneRepository.deleteByPhone(phone);
+    }
+
+    public Email deleteByEmail(String email) throws InvalidDataAccessApiUsageException {
+        return emailRepository.deleteByEmail(email);
     }
 
     public Page<BankUser> filter(FilterParams filterBy, String param, int page) throws DateTimeParseException {
@@ -119,7 +138,7 @@ public class UserService {
                 Email email = emailRepository.findByEmail(param);
                 yield userRepository.findByEmails(email, pageable);
             }
-            case BIRTH_DATE: { //DateTimeParseException
+            case BIRTH_DATE: {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 LocalDate date = LocalDate.parse(param, formatter);
                 System.out.println(param);

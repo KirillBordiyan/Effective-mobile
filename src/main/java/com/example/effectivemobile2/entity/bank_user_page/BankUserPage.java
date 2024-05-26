@@ -1,12 +1,12 @@
-package com.example.effectivemobile2.entity;
+package com.example.effectivemobile2.entity.bank_user_page;
 
+import com.example.effectivemobile2.entity.bank_user.BankUser;
+import com.example.effectivemobile2.entity.bank_user.BankUserEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)

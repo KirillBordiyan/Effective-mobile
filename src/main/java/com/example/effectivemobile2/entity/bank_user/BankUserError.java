@@ -1,4 +1,4 @@
-package com.example.effectivemobile2.entity;
+package com.example.effectivemobile2.entity.bank_user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
