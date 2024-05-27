@@ -7,6 +7,7 @@ import com.example.effectivemobile2.entity.bank_user.BankUser;
 import com.example.effectivemobile2.entity.user_params.Email;
 import com.example.effectivemobile2.entity.user_params.Phone;
 import com.example.effectivemobile2.entity.user_params.UserParam;
+import com.example.effectivemobile2.exceptions.LastElementException;
 import com.example.effectivemobile2.repo.EmailRepository;
 import com.example.effectivemobile2.repo.FilterParams;
 import com.example.effectivemobile2.repo.PhoneRepository;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -88,38 +90,44 @@ public class UserService {
         return bankUser;
     }
 
-//    public BankUser deleteNumber() {
-//        BankUser bankUser = userRepository.findAllById().stream().toList().get(0);
-//
-//    }
-
-//    public BankUser deleteEmail() {
-//        BankUser bankUser = userRepository.findAllById().stream().toList().get(0);
-//
-//    }
-
-
     public void deleteUser(BankUserDeleteDTO deleteDTO) throws InvalidDataAccessApiUsageException {
         userRepository.deleteById(deleteDTO.getId());
     }
 
-
     public UserParam deleteByParam(BankUserDeleteDTO deleteDTO) throws InvalidDataAccessApiUsageException{
+        BankUser user = userRepository.findById(deleteDTO.getId()).stream().toList().get(0);
         if(deleteDTO.getPhoneDelete() != null){
-            return deleteByPhone(deleteDTO.getPhoneDelete());
+            return deleteNumber(user, deleteDTO.getPhoneDelete());
         }
         if(deleteDTO.getEmailDelete() != null){
-            return deleteByEmail(deleteDTO.getEmailDelete());
+            return deleteEmail(user, deleteDTO.getEmailDelete());
+        }//TODO проверить исключение
+        throw new InvalidParameterException("INVALID PARAMETER: PHONE OR EMAIL MUST NOT BE NULL");
+    }
+
+    public Phone deleteNumber(BankUser currentUser, String phone) {
+        Phone curPhone = phoneRepository.findByNumber(phone);
+        if(phoneRepository.count() > 1) {
+            currentUser.getPhones().remove(curPhone);
+            phoneRepository.deleteById(curPhone.getId());
+            userRepository.save(currentUser);
         }
-        return null;
+        else{
+            throw new LastElementException("THE ELEMENT PHONE IS LAST");
+        }
+        return curPhone;
     }
 
-    public Phone deleteByPhone(String phone) throws InvalidDataAccessApiUsageException {
-        return phoneRepository.deleteByPhone(phone);
-    }
-
-    public Email deleteByEmail(String email) throws InvalidDataAccessApiUsageException {
-        return emailRepository.deleteByEmail(email);
+    public Email deleteEmail(BankUser currentUser, String email) {
+        Email curEmail = emailRepository.findByMail(email);
+        if(emailRepository.count() > 1){
+            currentUser.getEmails().remove(curEmail);
+            emailRepository.deleteById(curEmail.getId());
+            userRepository.save(currentUser);
+        }else{
+            throw new LastElementException("THE ELEMENT EMAIL IS LAST");
+        }
+        return curEmail;
     }
 
     public Page<BankUser> filter(FilterParams filterBy, String param, int page) throws DateTimeParseException {
@@ -131,11 +139,11 @@ public class UserService {
                 yield userRepository.findByFullNameContaining(param, pageable);
             }
             case PHONE: {
-                Phone phone = phoneRepository.findByPhone(param);
+                Phone phone = phoneRepository.findByNumber(param);
                 yield userRepository.findByPhones(phone, pageable);
             }
             case EMAIL: {
-                Email email = emailRepository.findByEmail(param);
+                Email email = emailRepository.findByMail(param);
                 yield userRepository.findByEmails(email, pageable);
             }
             case BIRTH_DATE: {

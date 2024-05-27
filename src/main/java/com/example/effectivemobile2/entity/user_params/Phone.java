@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Entity(name = "phone")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,17 +17,18 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(value = { "bank_user" })
 public class Phone extends UserParam {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true, nullable = false)
-    private String phone;
+    private String number;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private BankUser bank_user;
 
-    public Phone(String phone, BankUser bank_user) {
-        this.phone = phone;
+    public Phone(String number, BankUser bank_user) {
+        this.number = number;
         this.bank_user = bank_user;
     }
 
@@ -33,6 +36,6 @@ public class Phone extends UserParam {
     public String toString() {
         return "Phone{" +
                 "id=" + id +
-                ", phone='" + phone + '\'';
+                ", phone='" + number + "'}";
     }
 }

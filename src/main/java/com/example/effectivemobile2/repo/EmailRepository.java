@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EmailRepository extends JpaRepository<Email, Long> {
-    Email findByEmail(String email);
-    Email deleteByEmail(String email);
+    Email findByMail(String email);
 }

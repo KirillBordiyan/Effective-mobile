@@ -15,17 +15,18 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(value = { "bank_user" })
 public class Email extends UserParam {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true, nullable = false)
-    private String email;
+    private String mail;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private BankUser bank_user;
 
-    public Email(String email, BankUser bank_user) {
-        this.email = email;
+    public Email(String mail, BankUser bank_user) {
+        this.mail = mail;
         this.bank_user = bank_user;
     }
 
@@ -33,6 +34,6 @@ public class Email extends UserParam {
     public String toString() {
         return "Email{" +
                 "id=" + id +
-                ", email='" + email + '\'';
+                ", email='" + mail + "}";
     }
 }

@@ -16,4 +16,5 @@ public interface UserRepository extends JpaRepository<BankUser, Long> {
     Page<BankUser> findByPhones (Phone phone, Pageable pageable); // фильтр по 100% сходству
     Page<BankUser> findByFullNameContaining (String name, Pageable pageable);//фильтр по совпадению like ‘{text-from-request-param}%’
     Page<BankUser> findByEmails (Email email, Pageable pageable); // фильтр по 100% сходству
+
 }
