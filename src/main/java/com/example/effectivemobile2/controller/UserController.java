@@ -27,60 +27,13 @@ import java.security.InvalidParameterException;
 import java.time.format.DateTimeParseException;
 
 @RestController
+@RequestMapping("user/")
 @AllArgsConstructor
 @Tag(name = "User Controller", description = "Tutorial about user API")
 public class UserController {
 
     @Autowired
     private final UserService userService;
-
-
-    @PostMapping("/create_user")
-    @Operation(
-            description = "Create a new user by input JSON data",
-            tags = {"post", "admin action"}
-    )
-    public ResponseEntity<BankUserEntity> create(@RequestBody BankUserCreateDTO dto) {
-        if (dto.getInitialAmount() < 0)
-            return new ResponseEntity<>(new BankUserError("Error"), HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(userService.create(dto), HttpStatus.OK);
-    }
-
-
-    @GetMapping("/get_all")
-    @Operation(
-            description = "Get Page of users from DB",
-            tags = {"get", "admin action"}
-    )
-    public ResponseEntity<BankUserList> readAll(@RequestParam(defaultValue = "0") int page) {
-
-        //пагинация
-        //возвращаем здесь И в остальном целые страницы юзеров
-        Page<BankUser> users = userService.readAll(page);
-        Integer nextPageIs = (users.getTotalPages() > page + 1) ? page + 1 : null;
-        return new ResponseEntity<>(new BankUserList(users.toList(), nextPageIs), HttpStatus.OK);
-    }
-
-
-    @GetMapping("/filter")
-    @Operation(
-            description = "Get Page of users from DB by parameter",
-            tags = {"get", "admin action"}
-    )
-    public ResponseEntity<BankUserEntity> filterByParam(@RequestParam FilterParams filterBy,
-                                                        @RequestParam String param,
-                                                        @RequestParam(defaultValue = "0") int page) {
-        try {
-            Page<BankUser> users = userService.filter(filterBy, param, page);
-            Integer nextPage = (users.getTotalPages() > page + 1) ? page + 1 : null;
-            return new ResponseEntity<>(new BankUserList(users.toList(), nextPage), HttpStatus.OK);
-        } catch (DateTimeParseException e) {
-//            log.error(e.getMessage());
-            return new ResponseEntity<>(new BankUserError("INCORRECT DATE FORMAT: " + e.getMessage()),
-                    HttpStatus.BAD_REQUEST);
-        }
-    }
-
 
     @DeleteMapping("/delete_param")
     @Operation(
@@ -96,7 +49,7 @@ public class UserController {
         }
     }
 
-    @PutMapping("/update_user")
+    @PutMapping("/update_param")
     @Operation(
             description = "Update user param by id and params necessary",
             tags = {"put", "user action"}
@@ -118,22 +71,6 @@ public class UserController {
 //            log.info(e.getMessage());
             return new ResponseEntity<>(new BankUserError("ID IS NULL: " + e.getMessage()),
                     HttpStatus.BAD_REQUEST);
-        }
-    }
-
-
-    @DeleteMapping("/delete_user")
-    @Operation(
-            description = "Delete user completely",
-            tags = {"delete", "admin action"}
-    )
-    public HttpStatus deleteUser(@RequestBody BankUserDeleteDTO deleteDTO) {
-        try {
-            userService.deleteUser(deleteDTO);
-            return HttpStatus.OK;
-        } catch (InvalidDataAccessApiUsageException e) {
-//            log.info(e.getMessage());
-            return HttpStatus.BAD_REQUEST;
         }
     }
 }
