@@ -12,6 +12,8 @@ import com.example.effectivemobile2.entity.user_params.UserParamError;
 import com.example.effectivemobile2.exceptions.LastElementException;
 import com.example.effectivemobile2.repo.FilterParams;
 import com.example.effectivemobile2.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,32 +28,30 @@ import java.time.format.DateTimeParseException;
 
 @RestController
 @AllArgsConstructor
+@Tag(name = "User Controller", description = "Tutorial about user API")
 public class UserController {
 
     @Autowired
     private final UserService userService;
 
-    //создание нового пользователя
-    //апи служебный
+
     @PostMapping("/create_user")
+    @Operation(
+            description = "Create a new user by input JSON data",
+            tags = {"post", "admin action"}
+    )
     public ResponseEntity<BankUserEntity> create(@RequestBody BankUserCreateDTO dto) {
-//        /*@RequestHeader(value = "Authorization", required = false) String token*/)
-
-
-//        if (token == null)
-//            return new ResponseEntity<>(new BankUserError("Need Authorization"), HttpStatus.UNAUTHORIZED);
-//        else if (token.startsWith("Bearer")) {
-//            if (token.startsWith("0000000000", 7)) {
         if (dto.getInitialAmount() < 0)
             return new ResponseEntity<>(new BankUserError("Error"), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(userService.create(dto), HttpStatus.OK);
-//            } else return new ResponseEntity<>(new BankUserError("Incorrect Bearer token"), HttpStatus.UNAUTHORIZED);
-//        } else return new ResponseEntity<>(new BankUserError("Need Bearer token"), HttpStatus.UNAUTHORIZED);
     }
 
-    //получение списка пользователей
-    //служебный
+
     @GetMapping("/get_all")
+    @Operation(
+            description = "Get Page of users from DB",
+            tags = {"get", "admin action"}
+    )
     public ResponseEntity<BankUserList> readAll(@RequestParam(defaultValue = "0") int page) {
 
         //пагинация
@@ -61,8 +61,12 @@ public class UserController {
         return new ResponseEntity<>(new BankUserList(users.toList(), nextPageIs), HttpStatus.OK);
     }
 
-    //служебный
+
     @GetMapping("/filter")
+    @Operation(
+            description = "Get Page of users from DB by parameter",
+            tags = {"get", "admin action"}
+    )
     public ResponseEntity<BankUserEntity> filterByParam(@RequestParam FilterParams filterBy,
                                                         @RequestParam String param,
                                                         @RequestParam(defaultValue = "0") int page) {
@@ -78,9 +82,25 @@ public class UserController {
     }
 
 
-    //вопросик, может быть и тот и тот, надо разделить
-    //скорее всего пользовательский
+    @DeleteMapping("/delete_param")
+    @Operation(
+            description = "Delete some phone/email in user card",
+            tags = {"delete", "user action"}
+    )
+    public ResponseEntity<UserParam> deleteByParam(@RequestBody BankUserDeleteDTO deleteDTO) {
+        try {
+            return new ResponseEntity<>(userService.deleteByParam(deleteDTO), HttpStatus.OK);
+        } catch (InvalidDataAccessApiUsageException | LastElementException | InvalidParameterException e) {
+            return new ResponseEntity<>(new UserParamError("INCORRECT INPUT: " + e.getMessage()),
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PutMapping("/update_user")
+    @Operation(
+            description = "Update user param by id and params necessary",
+            tags = {"put", "user action"}
+    )
     public ResponseEntity<BankUserEntity> update(@RequestBody BankUserUpdateDTO dto) {
         try {
             BankUserEntity bankUser = userService.update(dto);
@@ -101,20 +121,12 @@ public class UserController {
         }
     }
 
-    //пользовательский для удаления телефона и почты
-    @DeleteMapping("/delete_param")
-    public ResponseEntity<UserParam> deleteByParam(@RequestBody BankUserDeleteDTO deleteDTO) {
-        try {
-            return new ResponseEntity<>(userService.deleteByParam(deleteDTO), HttpStatus.OK);
-        } catch (InvalidDataAccessApiUsageException | LastElementException | InvalidParameterException e) {
-            return new ResponseEntity<>(new UserParamError("INCORRECT INPUT: " + e.getMessage()),
-                    HttpStatus.BAD_REQUEST);
-        }
-    }
 
-    //удаление пользователя из репозитория по id
-    //служебный
     @DeleteMapping("/delete_user")
+    @Operation(
+            description = "Delete user completely",
+            tags = {"delete", "admin action"}
+    )
     public HttpStatus deleteUser(@RequestBody BankUserDeleteDTO deleteDTO) {
         try {
             userService.deleteUser(deleteDTO);
