@@ -8,10 +8,7 @@ import com.example.effectivemobile2.entity.user_params.Email;
 import com.example.effectivemobile2.entity.user_params.Phone;
 import com.example.effectivemobile2.entity.user_params.UserParam;
 import com.example.effectivemobile2.exceptions.LastElementException;
-import com.example.effectivemobile2.repo.EmailRepository;
-import com.example.effectivemobile2.repo.FilterParams;
-import com.example.effectivemobile2.repo.PhoneRepository;
-import com.example.effectivemobile2.repo.UserRepository;
+import com.example.effectivemobile2.repo.*;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,23 +16,46 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.InvalidParameterException;
+import java.security.Security;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashSet;
+import java.util.*;
 
 
 @Service
 @AllArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final EmailRepository emailRepository;
+    private final RoleRepository roleRepository;
+
+    @Override
+    @Transactional
+    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        BankUser user = findByLogin(login).orElseThrow(() -> new UsernameNotFoundException(String.format("User with login: '%s' not found", login)));
+        return new User(
+                user.getLogin(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority(user.getRole().getNameRole().toString()))
+        );
+    }
+
+    public Optional<BankUser> findByLogin(String login){
+        return userRepository.findByLogin(login);
+    }
 
     public BankUser create(BankUserCreateDTO dto) {
 
@@ -45,6 +65,7 @@ public class UserService {
                 .currentBalance(dto.getInitialAmount())
                 .birthDate(LocalDate.parse(dto.getBirthDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")))
                 .fullName(dto.getFullName())
+                .role(roleRepository.findByNameRole("USER").get())
                 .build();
 
         Phone phone = new Phone(dto.getPhoneNumber(), bank_user);

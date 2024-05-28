@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.InvalidParameterException;
+import java.security.Principal;
 import java.time.format.DateTimeParseException;
 
 @RestController
@@ -34,6 +35,11 @@ public class UserController {
 
     @Autowired
     private final UserService userService;
+
+    @GetMapping("/current_info")
+    public String getMyInfo(Principal principal){
+        return principal.toString();
+    }
 
     @DeleteMapping("/delete_param")
     @Operation(
