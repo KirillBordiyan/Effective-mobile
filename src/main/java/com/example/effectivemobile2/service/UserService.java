@@ -21,15 +21,19 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.InvalidParameterException;
-import java.security.Security;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -42,6 +46,7 @@ public class UserService implements UserDetailsService {
     private final EmailRepository emailRepository;
     private final RoleRepository roleRepository;
 
+
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
@@ -49,42 +54,47 @@ public class UserService implements UserDetailsService {
         return new User(
                 user.getLogin(),
                 user.getPassword(),
-                List.of(new SimpleGrantedAuthority(user.getRole().getNameRole().toString()))
+                user.getRole().stream().map(role -> new SimpleGrantedAuthority(role.getNameRole().toString())).collect(Collectors.toList())
+//                если роль - не список
+//                List.of(new SimpleGrantedAuthority(user.getRole().get().toString()))
         );
     }
 
-    public Optional<BankUser> findByLogin(String login){
+    public Optional<BankUser> findByLogin(String login) {
         return userRepository.findByLogin(login);
     }
 
-    public BankUser create(BankUserCreateDTO dto) {
 
-        BankUser bank_user = BankUser.builder()
-                .login(dto.getLogin())
-                .password(dto.getPassword())
-                .currentBalance(dto.getInitialAmount())
-                .birthDate(LocalDate.parse(dto.getBirthDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")))
-                .fullName(dto.getFullName())
-                .role(roleRepository.findByNameRole("USER").get())
-                .build();
+    public BankUser create(BankUserCreateDTO dto, String role) {
+        PasswordEncoder ps = new BCryptPasswordEncoder();
 
-        Phone phone = new Phone(dto.getPhoneNumber(), bank_user);
-        Email email = new Email(dto.getEmail(), bank_user);
+            BankUser bank_user = BankUser.builder()
+                    .login(dto.getLogin())
+                    .password(ps.encode(dto.getPassword()))
+                    .currentBalance(dto.getInitialAmount())
+                    .birthDate(LocalDate.parse(dto.getBirthDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                    .fullName(dto.getFullName())
+                    .role(List.of(roleRepository.findByNameRole(role).get()))
+                    .build();
 
-        if (bank_user.getPhones() == null) {
-            bank_user.setPhones(new HashSet<>());
-            bank_user.getPhones().add(phone);
-        }
-        if (bank_user.getEmails() == null) {
-            bank_user.setEmails(new HashSet<>());
-            bank_user.getEmails().add(email);
-        }
 
-        userRepository.save(bank_user);
-        phoneRepository.save(phone);
-        emailRepository.save(email);
+            Phone phone = new Phone(dto.getPhoneNumber(), bank_user);
+            Email email = new Email(dto.getEmail(), bank_user);
 
-        return bank_user;
+            if (bank_user.getPhones() == null) {
+                bank_user.setPhones(new HashSet<>());
+                bank_user.getPhones().add(phone);
+            }
+            if (bank_user.getEmails() == null) {
+                bank_user.setEmails(new HashSet<>());
+                bank_user.getEmails().add(email);
+            }
+
+            userRepository.save(bank_user);
+            phoneRepository.save(phone);
+            emailRepository.save(email);
+
+            return bank_user;
     }
 
     public Page<BankUser> readAll(int page) throws NumberFormatException {
@@ -115,12 +125,12 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(deleteDTO.getId());
     }
 
-    public UserParam deleteByParam(BankUserDeleteDTO deleteDTO) throws InvalidDataAccessApiUsageException{
+    public UserParam deleteByParam(BankUserDeleteDTO deleteDTO) throws InvalidDataAccessApiUsageException {
         BankUser user = userRepository.findById(deleteDTO.getId()).stream().toList().get(0);
-        if(deleteDTO.getPhoneDelete() != null){
+        if (deleteDTO.getPhoneDelete() != null) {
             return deleteNumber(user, deleteDTO.getPhoneDelete());
         }
-        if(deleteDTO.getEmailDelete() != null){
+        if (deleteDTO.getEmailDelete() != null) {
             return deleteEmail(user, deleteDTO.getEmailDelete());
         }//TODO проверить исключение
         throw new InvalidParameterException("INVALID PARAMETER: PHONE OR EMAIL MUST NOT BE NULL");
@@ -128,12 +138,11 @@ public class UserService implements UserDetailsService {
 
     public Phone deleteNumber(BankUser currentUser, String phone) {
         Phone curPhone = phoneRepository.findByNumber(phone);
-        if(phoneRepository.count() > 1) {
+        if (phoneRepository.count() > 1) {
             currentUser.getPhones().remove(curPhone);
             phoneRepository.deleteById(curPhone.getId());
             userRepository.save(currentUser);
-        }
-        else{
+        } else {
             throw new LastElementException("THE ELEMENT PHONE IS LAST");
         }
         return curPhone;
@@ -141,11 +150,11 @@ public class UserService implements UserDetailsService {
 
     public Email deleteEmail(BankUser currentUser, String email) {
         Email curEmail = emailRepository.findByMail(email);
-        if(emailRepository.count() > 1){
+        if (emailRepository.count() > 1) {
             currentUser.getEmails().remove(curEmail);
             emailRepository.deleteById(curEmail.getId());
             userRepository.save(currentUser);
-        }else{
+        } else {
             throw new LastElementException("THE ELEMENT EMAIL IS LAST");
         }
         return curEmail;

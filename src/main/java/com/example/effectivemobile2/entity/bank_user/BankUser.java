@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Set;
 
 @Entity(name = "bank_user")
@@ -51,5 +52,5 @@ public class BankUser extends BankUserEntity {
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Role role;
+    private Collection<Role> role;
 }

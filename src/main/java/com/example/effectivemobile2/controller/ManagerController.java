@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.format.DateTimeParseException;
 
 @RestController
-@RequestMapping("manager/")
+@RequestMapping("/manager")
 @AllArgsConstructor
 @Tag(name = "Manager Controller", description = "Tutorial about manager API")
 public class ManagerController {
@@ -34,10 +34,11 @@ public class ManagerController {
             description = "Create a new user by input JSON data",
             tags = {"post", "admin action"}
     )
-    public ResponseEntity<BankUserEntity> create(@RequestBody BankUserCreateDTO dto) {
+    public ResponseEntity<BankUserEntity> create(@RequestBody BankUserCreateDTO dto,
+                                                 @RequestParam(defaultValue = "USER") String role) {
         if (dto.getInitialAmount() < 0)
-            return new ResponseEntity<>(new BankUserError("Error"), HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(userService.create(dto), HttpStatus.OK);
+            return new ResponseEntity<>(new BankUserError("Error: initial amount < 0"), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(userService.create(dto, role), HttpStatus.OK);
     }
 
     @GetMapping("/get_all")
