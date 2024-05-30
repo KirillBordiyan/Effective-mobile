@@ -1,16 +1,12 @@
 package com.example.effectivemobile2.controller;
 
-import com.example.effectivemobile2.dto.BankUserCreateDTO;
 import com.example.effectivemobile2.dto.BankUserDeleteDTO;
 import com.example.effectivemobile2.dto.BankUserUpdateDTO;
-import com.example.effectivemobile2.entity.bank_user.BankUser;
 import com.example.effectivemobile2.entity.bank_user.BankUserEntity;
 import com.example.effectivemobile2.entity.bank_user.BankUserError;
-import com.example.effectivemobile2.entity.bank_user_list_error.BankUserList;
 import com.example.effectivemobile2.entity.user_params.UserParam;
 import com.example.effectivemobile2.entity.user_params.UserParamError;
 import com.example.effectivemobile2.exceptions.LastElementException;
-import com.example.effectivemobile2.repo.FilterParams;
 import com.example.effectivemobile2.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,14 +14,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.InvalidParameterException;
 import java.security.Principal;
-import java.time.format.DateTimeParseException;
 
 @RestController
 @RequestMapping("/user")
@@ -37,6 +31,10 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/current_info")
+    @Operation(
+            description = "Get current info about user",
+            tags = {"get", "user action"}
+    )
     public ResponseEntity<?> getMyInfo(Principal principal){
         return new ResponseEntity<>(userService.getCurrentInfo(principal), HttpStatus.OK);
     }
@@ -66,15 +64,15 @@ public class UserController {
 //            log.error("TAG", "update: " + bankUser); //лог, что создан (после создания)
             return new ResponseEntity<>(bankUser, HttpStatus.OK);
         } catch (IndexOutOfBoundsException e) {
-//            log.info(e.getMessage());
+//            log.info(e.getMessage()); // лог ошибки, если поле id проблемное
             return new ResponseEntity<>(new BankUserError("INCORRECT ID: " + e.getMessage()),
                     HttpStatus.BAD_REQUEST);
         } catch (DataIntegrityViolationException e) {
-//            log.info(e.getMessage());
+//            log.info(e.getMessage());//если такое уже существует
             return new ResponseEntity<>(new BankUserError("THE SAME VALUE ALREADY EXISTS: " + e.getMessage()),
                     HttpStatus.BAD_REQUEST);
         } catch (InvalidDataAccessApiUsageException e) {
-//            log.info(e.getMessage());
+//            log.info(e.getMessage());//что id - null
             return new ResponseEntity<>(new BankUserError("ID IS NULL: " + e.getMessage()),
                     HttpStatus.BAD_REQUEST);
         }

@@ -33,21 +33,26 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/hello", "/authenticate").permitAll(); //вообще всем , "/admin/**"
+                    registry.requestMatchers("/common/**",
+                            "/effective-mobile-documentation",
+                            "/effective-mobile-api-docs").permitAll(); //вообще всем
                     registry.requestMatchers("/admin/**").hasRole("ADMIN"); //только админу
                     registry.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER"); //только пользователю
                     registry.anyRequest().authenticated(); //все, что не попало выше - только авторизованным
                 })
-                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
+                .formLogin(httpSecurityFormLoginConfigurer -> {
+                    httpSecurityFormLoginConfigurer
+                            .successHandler(new AuthenticationSuccessHandler())
+                            .permitAll();
+                })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(){
+    public AuthenticationManager authenticationManager() {
         return new ProviderManager(authenticationProvider());
     }
-
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -55,7 +60,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(bankUserDetailService);
         provider.setPasswordEncoder(passwordEncoder());

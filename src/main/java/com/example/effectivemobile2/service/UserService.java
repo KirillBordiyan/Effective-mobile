@@ -47,7 +47,6 @@ public class UserService {
     private PasswordEncoder ps;
 
 
-
     public Optional<BankUser> findByLogin(String login) {
         return userRepository.findByLogin(login);
     }
@@ -55,33 +54,32 @@ public class UserService {
 
     public BankUser create(BankUserCreateDTO dto) {
 
-            BankUser bank_user = BankUser.builder()
-                    .login(dto.getLogin())
-                    .password(ps.encode(dto.getPassword()))
-                    .currentBalance(dto.getInitialAmount())
-                    .birthDate(LocalDate.parse(dto.getBirthDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")))
-                    .fullName(dto.getFullName())
-                    .role(dto.getRoles())
-                    .build();
+        BankUser bank_user = BankUser.builder()
+                .login(dto.getLogin())
+                .password(ps.encode(dto.getPassword()))
+                .currentBalance(dto.getInitialAmount())
+                .birthDate(LocalDate.parse(dto.getBirthDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")))
+                .fullName(dto.getFullName())
+                .role(dto.getRoles())
+                .build();
 
+        Phone phone = new Phone(dto.getPhoneNumber(), bank_user);
+        Email email = new Email(dto.getEmail(), bank_user);
 
-            Phone phone = new Phone(dto.getPhoneNumber(), bank_user);
-            Email email = new Email(dto.getEmail(), bank_user);
+        if (bank_user.getPhones() == null) {
+            bank_user.setPhones(new HashSet<>());
+            bank_user.getPhones().add(phone);
+        }
+        if (bank_user.getEmails() == null) {
+            bank_user.setEmails(new HashSet<>());
+            bank_user.getEmails().add(email);
+        }
 
-            if (bank_user.getPhones() == null) {
-                bank_user.setPhones(new HashSet<>());
-                bank_user.getPhones().add(phone);
-            }
-            if (bank_user.getEmails() == null) {
-                bank_user.setEmails(new HashSet<>());
-                bank_user.getEmails().add(email);
-            }
+        userRepository.save(bank_user);
+        phoneRepository.save(phone);
+        emailRepository.save(email);
 
-            userRepository.save(bank_user);
-            phoneRepository.save(phone);
-            emailRepository.save(email);
-
-            return bank_user;
+        return bank_user;
     }
 
     public Page<BankUser> readAll(int page) throws NumberFormatException {
@@ -119,7 +117,7 @@ public class UserService {
         }
         if (deleteDTO.getEmailDelete() != null) {
             return deleteEmail(user, deleteDTO.getEmailDelete());
-        }//TODO проверить исключение
+        }
         throw new InvalidParameterException("INVALID PARAMETER: PHONE OR EMAIL MUST NOT BE NULL");
     }
 
@@ -147,7 +145,8 @@ public class UserService {
         return curEmail;
     }
 
-    public Page<BankUser> filter(FilterParams filterBy, String param, int page) throws DateTimeParseException {
+    public Page<BankUser> filter(FilterParams filterBy, String param, int page) throws
+            NullPointerException {
         //для пагинации
         Pageable pageable = PageRequest.of(page, 10);
 
@@ -156,7 +155,7 @@ public class UserService {
                 yield userRepository.findByFullNameContaining(param, pageable);
             }
             case PHONE: {
-                Phone phone = phoneRepository.findByNumber(param);
+                Phone phone = phoneRepository.findByNumber("+" + param);
                 yield userRepository.findByPhones(phone, pageable);
             }
             case EMAIL: {
@@ -166,14 +165,12 @@ public class UserService {
             case BIRTH_DATE: {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                 LocalDate date = LocalDate.parse(param, formatter);
-                System.out.println(param);
-                System.out.println(date);
                 yield userRepository.findByBirthDateGreaterThanEqual(date, pageable);
             }
         };
     }
 
-    public BankUser getCurrentInfo(Principal principal){
+    public BankUser getCurrentInfo(Principal principal) {
         return findByLogin(principal.getName()).get();
     }
 

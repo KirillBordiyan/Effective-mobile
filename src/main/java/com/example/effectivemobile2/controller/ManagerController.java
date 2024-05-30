@@ -6,6 +6,7 @@ import com.example.effectivemobile2.entity.bank_user.BankUser;
 import com.example.effectivemobile2.entity.bank_user.BankUserEntity;
 import com.example.effectivemobile2.entity.bank_user.BankUserError;
 import com.example.effectivemobile2.entity.bank_user_list_error.BankUserList;
+import com.example.effectivemobile2.entity.bank_user_list_error.BankUserListError;
 import com.example.effectivemobile2.repo.FilterParams;
 import com.example.effectivemobile2.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -30,8 +32,6 @@ public class ManagerController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/create_user")
     @Operation(
@@ -45,7 +45,6 @@ public class ManagerController {
         }
         return new ResponseEntity<>(userService.create(dto), HttpStatus.OK);
     }
-
 
     @GetMapping("/get_all")
     @Operation(
@@ -66,7 +65,7 @@ public class ManagerController {
             description = "Get Page of users from DB by parameter",
             tags = {"get", "admin action"}
     )
-    public ResponseEntity<BankUserEntity> filterByParam(@RequestParam FilterParams filterBy,
+    public ResponseEntity<?> filterByParam(@RequestParam FilterParams filterBy,
                                                         @RequestParam String param,
                                                         @RequestParam(defaultValue = "0") int page) {
         try {
@@ -75,7 +74,10 @@ public class ManagerController {
             return new ResponseEntity<>(new BankUserList(users.toList(), nextPage), HttpStatus.OK);
         } catch (DateTimeParseException e) {
 //            log.error(e.getMessage());
-            return new ResponseEntity<>(new BankUserError("INCORRECT DATE FORMAT: " + e.getMessage()),
+            return new ResponseEntity<>(new BankUserListError("INCORRECT DATE FORMAT: " + e.getMessage()),
+                    HttpStatus.BAD_REQUEST);
+        } catch (NullPointerException e){
+            return new ResponseEntity<>(new BankUserListError(String.format("PARAMETER '%s' INCORRECT", param)),
                     HttpStatus.BAD_REQUEST);
         }
     }
