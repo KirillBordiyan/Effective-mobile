@@ -28,7 +28,7 @@ import java.security.Principal;
 import java.time.format.DateTimeParseException;
 
 @RestController
-@RequestMapping("user/")
+@RequestMapping("/user")
 @AllArgsConstructor
 @Tag(name = "User Controller", description = "Tutorial about user API")
 public class UserController {
@@ -37,8 +37,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/current_info")
-    public String getMyInfo(Principal principal){
-        return principal.toString();
+    public ResponseEntity<?> getMyInfo(Principal principal){
+        return new ResponseEntity<>(userService.getCurrentInfo(principal), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete_param")

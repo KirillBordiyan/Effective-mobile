@@ -8,7 +8,10 @@ import com.example.effectivemobile2.entity.user_params.Email;
 import com.example.effectivemobile2.entity.user_params.Phone;
 import com.example.effectivemobile2.entity.user_params.UserParam;
 import com.example.effectivemobile2.exceptions.LastElementException;
-import com.example.effectivemobile2.repo.*;
+import com.example.effectivemobile2.repo.EmailRepository;
+import com.example.effectivemobile2.repo.FilterParams;
+import com.example.effectivemobile2.repo.PhoneRepository;
+import com.example.effectivemobile2.repo.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -16,57 +19,41 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.security.InvalidParameterException;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @Service
 @AllArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
 
     @Autowired
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final EmailRepository emailRepository;
-    private final RoleRepository roleRepository;
+    @Autowired
+    private PasswordEncoder ps;
 
 
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        BankUser user = findByLogin(login).orElseThrow(() -> new UsernameNotFoundException(String.format("User with login: '%s' not found", login)));
-        return new User(
-                user.getLogin(),
-                user.getPassword(),
-                user.getRole().stream().map(role -> new SimpleGrantedAuthority(role.getNameRole().toString())).collect(Collectors.toList())
-//                если роль - не список
-//                List.of(new SimpleGrantedAuthority(user.getRole().get().toString()))
-        );
-    }
 
     public Optional<BankUser> findByLogin(String login) {
         return userRepository.findByLogin(login);
     }
 
 
-    public BankUser create(BankUserCreateDTO dto, String role) {
-        PasswordEncoder ps = new BCryptPasswordEncoder();
+    public BankUser create(BankUserCreateDTO dto) {
 
             BankUser bank_user = BankUser.builder()
                     .login(dto.getLogin())
@@ -74,7 +61,7 @@ public class UserService implements UserDetailsService {
                     .currentBalance(dto.getInitialAmount())
                     .birthDate(LocalDate.parse(dto.getBirthDate(), DateTimeFormatter.ofPattern("dd-MM-yyyy")))
                     .fullName(dto.getFullName())
-                    .role(List.of(roleRepository.findByNameRole(role).get()))
+                    .role(dto.getRoles())
                     .build();
 
 
@@ -185,4 +172,9 @@ public class UserService implements UserDetailsService {
             }
         };
     }
+
+    public BankUser getCurrentInfo(Principal principal){
+        return findByLogin(principal.getName()).get();
+    }
+
 }

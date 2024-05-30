@@ -1,7 +1,5 @@
 package com.example.effectivemobile2.entity.bank_user;
 
-import com.example.effectivemobile2.entity.role.ERole;
-import com.example.effectivemobile2.entity.role.Role;
 import com.example.effectivemobile2.entity.user_params.Email;
 import com.example.effectivemobile2.entity.user_params.Phone;
 import jakarta.persistence.*;
@@ -10,7 +8,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Set;
 
 @Entity(name = "bank_user")
@@ -48,9 +45,12 @@ public class BankUser extends BankUserEntity {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Collection<Role> role;
+    @Column(name = "role", nullable = false)
+    private String role;
+
+//    @ManyToMany(fetch = FetchType.LAZY)
+//    @JoinTable(name = "user_role",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "role_id"))
+//    private Collection<Role> role;
 }

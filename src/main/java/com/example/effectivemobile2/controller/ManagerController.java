@@ -16,30 +16,42 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.format.DateTimeParseException;
 
 @RestController
-@RequestMapping("/manager")
+@RequestMapping("/admin")
 @AllArgsConstructor
-@Tag(name = "Manager Controller", description = "Tutorial about manager API")
+@Tag(name = "Admin Controller", description = "Tutorial about admin(manager) API")
 public class ManagerController {
 
     @Autowired
-    private final UserService userService;
+    private UserService userService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/create_user")
     @Operation(
             description = "Create a new user by input JSON data",
             tags = {"post", "admin action"}
     )
-    public ResponseEntity<BankUserEntity> create(@RequestBody BankUserCreateDTO dto,
-                                                 @RequestParam(defaultValue = "USER") String role) {
-        if (dto.getInitialAmount() < 0)
-            return new ResponseEntity<>(new BankUserError("Error: initial amount < 0"), HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(userService.create(dto, role), HttpStatus.OK);
+    public ResponseEntity<?> createUser(@RequestBody BankUserCreateDTO dto) {
+        if(dto.getInitialAmount() < 0){
+            return new ResponseEntity<>(new IllegalArgumentException("Error: initial amount < 0"),
+                    HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(userService.create(dto), HttpStatus.OK);
     }
+
+//    public ResponseEntity<BankUserEntity> create(@RequestBody BankUserCreateDTO dto,
+//                                                 @RequestParam(defaultValue = "USER") String role) {
+//        if (dto.getInitialAmount() < 0)
+//            return new ResponseEntity<>(new BankUserError("Error: initial amount < 0"), HttpStatus.BAD_REQUEST);
+//        return new ResponseEntity<>(userService.create(dto, role), HttpStatus.OK);
+//    }
 
     @GetMapping("/get_all")
     @Operation(
@@ -87,5 +99,10 @@ public class ManagerController {
 //            log.info(e.getMessage());
             return HttpStatus.BAD_REQUEST;
         }
+    }
+
+    @GetMapping("/current_info")
+    public ResponseEntity<?> getMyInfo(Principal principal){
+        return new ResponseEntity<>(userService.getCurrentInfo(principal), HttpStatus.OK);
     }
 }
