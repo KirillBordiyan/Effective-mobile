@@ -46,12 +46,6 @@ public class ManagerController {
         return new ResponseEntity<>(userService.create(dto), HttpStatus.OK);
     }
 
-//    public ResponseEntity<BankUserEntity> create(@RequestBody BankUserCreateDTO dto,
-//                                                 @RequestParam(defaultValue = "USER") String role) {
-//        if (dto.getInitialAmount() < 0)
-//            return new ResponseEntity<>(new BankUserError("Error: initial amount < 0"), HttpStatus.BAD_REQUEST);
-//        return new ResponseEntity<>(userService.create(dto, role), HttpStatus.OK);
-//    }
 
     @GetMapping("/get_all")
     @Operation(

@@ -3,7 +3,9 @@ package com.example.effectivemobile2.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,13 +30,18 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/hello").permitAll(); //вообще всем , "/admin/**"
+                    registry.requestMatchers("/hello", "/authenticate").permitAll(); //вообще всем , "/admin/**"
                     registry.requestMatchers("/admin/**").hasRole("ADMIN"); //только админу
                     registry.requestMatchers("/user/**").hasAnyRole("ADMIN", "USER"); //только пользователю
                     registry.anyRequest().authenticated(); //все, что не попало выше - только авторизованным
                 })
                 .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
                 .build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(){
+        return new ProviderManager(authenticationProvider());
     }
 
 
