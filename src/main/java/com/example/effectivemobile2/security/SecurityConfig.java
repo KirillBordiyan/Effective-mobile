@@ -22,12 +22,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @EnableWebSecurity
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity
-public class SecurityConfig {
+public class SecurityConfig{
 
     private final UserService userService;
     private final JwtRequestFilter jwtRequestFilter;
@@ -39,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers("/user/**").authenticated()
-                                .requestMatchers("/manager/**").hasRole("MANAGER")
+//                                .requestMatchers("/manager/**").hasRole("MANAGER")
                                 .anyRequest().permitAll()
 
                 ).sessionManagement((sessionManagement) ->
