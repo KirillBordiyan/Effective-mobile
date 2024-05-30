@@ -1,5 +1,6 @@
 package com.example.effectivemobile2.webtoken;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+//создание самого токена
 @Service
 public class JwtService {
     private static final  String SECRET = "D249CED5EB3F93BB4B5B30819ADC5C1BB7D5160DB8DD81B6E3C983B45F347CD01F49DE7DEA1A75A0ADBCF9E39C1C7F86AAF11AB9CC9C3CCBC6B36DE605C3FEFE";
@@ -33,5 +35,24 @@ public class JwtService {
     private SecretKey generateKey(){
         byte[] decodedKey = Base64.getDecoder().decode(SECRET);
         return Keys.hmacShaKeyFor(decodedKey);
+    }
+
+    public String extractUsername(String jwt){
+        Claims claims = getClaims(jwt);
+        return claims.getSubject();
+    }
+
+    private Claims getClaims(String jwt) {
+        return Jwts.parser()
+                .verifyWith(generateKey())
+                .build()
+                .parseSignedClaims(jwt)
+                .getPayload();
+    }
+
+    public boolean isTokenValid(String jwt){
+        Claims claims = getClaims(jwt);
+        return  claims.getExpiration().after(Date.from(Instant.now()));
+
     }
 }
