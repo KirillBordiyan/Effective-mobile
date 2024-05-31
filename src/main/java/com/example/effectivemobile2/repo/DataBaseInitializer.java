@@ -35,6 +35,11 @@ public class DataBaseInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        if(userRepository.count() != 0 ){
+            return;
+        }
+
         BankUser admin = BankUser.builder()
                 .login("admin_1")
                 .password(ps.encode("admin_1"))
